@@ -1,0 +1,27 @@
+version: '3.8'
+services: 
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    container_name: 'rabbitmq'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 15s
+      retries: 10
+  server:
+    build: ./server
+    container_name: rpc-server
+    depends_on: 
+      rabbitmq:
+        condition: service_healthy
+  client:
+    build: ./client
+    container_name: rpc-client
+    depends_on: 
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
